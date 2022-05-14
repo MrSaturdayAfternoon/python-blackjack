@@ -1,6 +1,7 @@
 import random
 
 class Entity:
+
     def __init__(self):
         self.hand = []
         self.hard_total = 0
@@ -10,11 +11,13 @@ class Entity:
         self.standing = False
         self.blackjack = False
 
+
     def choose_best_total(self):
         if self.hard_total >= self.soft_total:
             self.total = self.hard_total
         else:
             self.total = self.soft_total
+
 
     def display_hand(self):
         for card in self.hand:
@@ -23,6 +26,7 @@ class Entity:
             print(f"Hand total: {self.hard_total} or {self.soft_total}")
         else:
             print(f"Hand total: {self.hard_total}")
+
 
     def update_totals(self):
         temp_total = 0
@@ -62,34 +66,64 @@ class Entity:
             if aces > 0 :
              self.soft_total = soft_total
 
+    
+    def reset(self):
+        self.hand = []
+        self.hard_total = 0
+        self.soft_total = 0
+        self.total = 0
+        self.busted = False
+        self.standing = False
+        self.blackjack = False
+
+
 
 class Player(Entity):
     # TODO split, double-down, betting
-    DEFAULT_BANK = 100
+    DEFAULT_BANK = 1000
+
     def __init__(self, bank=DEFAULT_BANK, name=f"player {random.randint(1,1000)}", owner=None):
         super().__init__()
         self.bank = bank
-        self.bet = 5
+        self.current_bet = 0
+        self.insurance_bet = 0
+        self.winnings = 0
         self.name = name
         self.owner = owner
-
 
     def play(self):
         self.player_input()
 
+    def set_bet(self, amount, type=""):
+        if type == "insurance":
+            self.insurance_bet += amount
+            self.bank -= amount
+        else:
+            self.current_bet += amount
+            self.bank -= amount
 
-    def get_choice(self, dealer, deck):
-        player_choice = input("Please choose: \n1. Hit \n2. Stand \n>>")
-        if player_choice == '1':
-            self.hand.append(dealer.deal(deck))
-            self.update_totals()
-        elif player_choice == '2':
-            self.standing = True
-        self.choose_best_total()
+    def get_choice(self, name, dealer, deck):
+        if not self.blackjack:
+            player_choice = input(f"{name}, please choose an option: \n1. Hit \n2. Stand \n>>")
+            if player_choice == '1':
+                self.hand.append(dealer.deal(deck))
+                self.update_totals()
+            elif player_choice == '2':
+                self.standing = True
+            self.choose_best_total()
+        else:
+            self.choose_best_total()
     
 
+    def check_for_blackjack(self):
+        if self.total == 21:
+            self.blackjack = True
+
+
+    def reconcile_winnings(self):
+        pass
+
 class Dealer(Entity):
-    # TODO payout
 
     def __init__(self):
         super().__init__()

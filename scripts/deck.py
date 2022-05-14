@@ -16,10 +16,7 @@ class Deck:
     SUITS = ['Spades', 'Hearts', 'Clubs', "Diamonds"]
 
     def __init__(self):
-        self.cards = []
-        for suit in self.SUITS:
-            for rank in self.RANKS:
-                self.cards.append(Card(rank, suit))
+        self.reset()
 
     def display(self):
         for card in self.cards:
@@ -30,3 +27,9 @@ class Deck:
 
     def take_card(self):
         return self.cards.pop()
+
+    def reset(self):
+        self.cards = []
+        for suit in self.SUITS:
+            for rank in self.RANKS:
+                self.cards.append(Card(rank, suit))
