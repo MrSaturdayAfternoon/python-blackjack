@@ -3,6 +3,14 @@ from agents import Player, Dealer
 import os
 
 
+class Betting:
+    pass
+
+
+class PayOut:
+    pass
+
+
 class Round:
     
     # STATES = ['INITIALIZE', 'SHUFFLE', 'INITIAL DEAL', 'CHECK FOR BLACKJACK', 'OFFER INSURANCE', 'PLAYER ACTIONS', 'DEALER ACTIONS', 'DISPLAY', 'CHECK FOR WINS', 'PAYOUT', 'RESET', 'QUIT']
@@ -14,8 +22,6 @@ class Round:
         self.min_bet = min_bet
         self.state = "INITIALIZE"
         self.display_table()
-
-
 
 
     def initialize(self):
@@ -57,6 +63,7 @@ class Round:
         #         entity.hand.append(self.dealer.deal(self.deck, face_down=True))
         for entity in deal_order:
             entity.update_totals()
+            entity.choose_best_total()
 
 
     def post_deal_checks(self):
@@ -92,7 +99,7 @@ class Round:
             while not entered:
                 player_input = input(">>")
                 if player_input in "yY1":
-                    player.set_bet(0.5*player.current_bet, 'insurance')
+                    player.make_bet(0.5*player.current_bet, 'insurance')
                     entered = True
                 elif player_input in "nN2":
                     entered = True
@@ -202,7 +209,7 @@ class Round:
             user_in = input(f"{player.name}, please enter your bet. (Min {self.min_bet}): ")
             user_input_bet = float(user_in)
             if (user_input_bet >= self.min_bet):
-                player.set_bet(user_input_bet)
+                player.make_bet(user_input_bet)
                 entered = True
             else:
                 print(f"Please enter a bet that is at least {self.min_bet}")
@@ -217,22 +224,29 @@ class Round:
 
     def payout(self):
         for player in self.player_list:
-            
             if player.insurance_bet:
                 player.winnings += player.insurance_bet
-
-            if player in self.winner_list:
-                if player.blackjack:
-                    player.winnings += 1.5 * player.current_bet
-                else:
-                    player.winnings += player.current_bet
-                player.bank += player.winnings + player.current_bet
-
-            elif player in self.push_list:
-                player.bank += player.winnings + player.current_bet
-
-            elif player in self.loser_list:
-                player.bank += player.winnings
+                if player in self.winner_list:
+                    if player.blackjack:
+                        player.winnings += 1.5 * player.current_bet
+                    else:
+                        player.winnings += player.current_bet
+                    player.bank += player.winnings + player.current_bet + player.insurance_bet
+                elif player in self.push_list:
+                    player.bank += player.winnings + player.current_bet + player.insurance_bet
+                elif player in self.loser_list:
+                    player.bank += player.winnings + player.insurance_bet
+            else:
+                if player in self.winner_list:
+                    if player.blackjack:
+                        player.winnings += 1.5 * player.current_bet
+                    else:
+                        player.winnings += player.current_bet
+                    player.bank += player.winnings + player.current_bet
+                elif player in self.push_list:
+                    player.bank += player.winnings + player.current_bet
+                elif player in self.loser_list:
+                    player.bank += player.winnings
 
 
             player.current_bet = 0

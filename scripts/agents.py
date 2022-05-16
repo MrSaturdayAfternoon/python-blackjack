@@ -94,7 +94,7 @@ class Player(Entity):
     def play(self):
         self.player_input()
 
-    def set_bet(self, amount, type=""):
+    def make_bet(self, amount, type=""):
         if type == "insurance":
             self.insurance_bet += amount
             self.bank -= amount
